@@ -62,7 +62,7 @@ fn appendtrailer(command: &mut Vec<u8>)
 	let mut sum:u8 = 0;
 
 	for val in command.iter()
-    {
+	{
 		sum = sum.wrapping_add(*val);
 	}
 	// compute checksum
@@ -85,12 +85,12 @@ fn checkmsg(command: &mut Vec<u8>) -> Result<u32, String>
 
 	len -=1;
 	if command[len] != 0x0a
-    {
+	{
 		return Err(String::from("incorrect trailer"));
 	}
 	len -=1;
 	if command[len] != 0x0d
-    {
+	{
 		return Err(String::from("incorrect trailer"));
 	}
 	len -=1;
@@ -106,7 +106,7 @@ fn checkmsg(command: &mut Vec<u8>) -> Result<u32, String>
 	}
 
 	if sum != csum
-    {
+	{
 		return Err(String::from("incorrect csum"));
 	}
 
@@ -226,12 +226,12 @@ fn main()
 	press_key(b'#', &mut *port);
 
 	loop
-    {
+	{
 		let mut serial_data:[u8;32] = [0; 32];//will read no more than 128? = Vec::new();
 		let mut cmd_result = Vec::<u8>::new(); // [b'0', b'0', b'1'].to_vec();
 		cmd_result.clear();
 		loop
-	{
+		{
 			match port.read(&mut serial_data)
 			{
 				 Ok(bytes) =>
