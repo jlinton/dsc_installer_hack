@@ -1,36 +1,14 @@
 extern crate serialport;
 
-// rust, well lets see:
-// the forced Result/Err handling is good! Inconvenient for hack programs, but the ? and .expect() makes that less of an excuse.
-// the default warning/error levels help to push a program towards the if it compiles it works concept, this is awesome (catch the errors early) and is the main idea behind using rust, and it seems to work for simple programs.
-// int overflow/etc is specified in a reasonable way!
-// The compiler warning snake/camel/caps is a good convention (although I prefer more flexibility WRT local vs member/etc variables)
-
-// the default brace style is open on the same line as the condition/etc this is well known to be bad, which is why JSF/etc coding standards state match the braces and always use them, (aka lower cognitive load)
-// cargo, don't want to use it? Tough luck there if you just want a simple cargo dependency
-// type inference is fine for declaring, but not passing variables, what? I'm not even sure type inference is a good idea, the C++ auto keyword is just a crutch attempt to hide hideous type information, maybe one should avoid the hideiousness rather than hiding it
-// arrays, declaration vs initialization is a mess
-// the language doesn't have a "progression" in that you need to understand advanced concepts to do simple things, this might be the bigger problem than the borrow checker for learning the language.
-// "The rust programming language" exemplifies this by introducing error handling in the first chapter, but then doesn't explain fully until chapter 9, and its not complete because its not until chapter 11 when you learn how to create an Err/Result<>, so 200 pages to describe how to do something most languages can explain in the first chapter
-// the default syntax for many things requires scoping in the "constructor" , this actually violates the original premise of C++'s RII because it seems scoping in ::new() or ::from() is an inconsistent mess, worse when its generic, but the end result is non refrence types that aren't initialized
-// the array type is nearly useless without a bunch of manual macros/traits, might as well have just made Vec<> the default array
-// the default syntax is frequently inconvenient, copy_from_slice() on the destination, rather than .copy() on the source...
-// the non default &mut ends up being tagged into a lot of unneeded places because the compiler is dumb, maybe its my recent linux/c mindset, but I don't like long single assignments so I would rather assign and then add the additional bits this tends to force a lot of things !mut even which technically they are const, wonder if the compiler is smart enough to realize this
-// the borrow checker's errors are frequently odd, declare a vec<> without initializing it, the borrow checker ends up complaining about it being borrowed rather than noticing it needs to be initialized (see problem with RAII above)
-// type promotion is a pita
-// static compile time array's still need a declaration length? The compiler literally says "expected X elements; found Y"
-// array of structs are a PITA to declare due to a lot of unneeded verbosity, its way worse than ada/pascal which was criticized out of existence due to verbosity, painful because systems programs frequently have dozen or so line fixed structures
-// was cool with rust format! until i tried to make the first parameter non literal
-
 // no per the DSC, a good reference besides the IT-100 docs https://cms.dsc.com/download.php?t=1&id=16238
-// is here https://github.com/taligentx/dscKeybusInterface 
+// is here https://github.com/taligentx/dscKeybusInterface
 // the second link is a complete solution for people who don't want to mess with linux/etc
 // there is also a C++ project called dsc-alarm, its quite old and apparently written for OSX but not a garbage language (although it's java like code)...
 // https://sourceforge.net/p/dsc-alarm/code/HEAD/tree/
 
 //use serialport;
 
-// so this fits in the "my first rust program" category, so a lot of things are stripped if not needed, that means 
+// so this fits in the "my first rust program" category, so a lot of things are stripped if not needed, that means
 // no fancy classes or closures, its imperative/procedural programming all the way down. Subject to change as needed of course
 
 // its also a giant WTF in some ways because there are a ton of DSC interface programs on github/etc
@@ -82,15 +60,15 @@ fn from_hex(val:u8) -> u8
 fn appendtrailer(command: &mut Vec<u8>)
 {
 	let mut sum:u8 = 0;
-	
-	for val in command.iter() 
+
+	for val in command.iter()
     {
 		sum = sum.wrapping_add(*val);
 	}
 	// compute checksum
 	command.push(to_hex((sum & 0xF0) >> 4));
 	command.push(to_hex(sum & 0x0F));
-	// add the cr/lf 
+	// add the cr/lf
 	command.push(0x0d);
 	command.push(0x0a);
 }
@@ -118,7 +96,7 @@ fn checkmsg(command: &mut Vec<u8>) -> Result<u32, String>
 	len -=1;
 	let csum = from_hex(command[len]) + (from_hex(command[len-1])<<4);
 	len -=1;
-										 
+
 
 	// OK check the checksum
 	let mut sum:u8 = 0;
@@ -157,7 +135,7 @@ fn buildmess(cmd:u32,msg:&mut Vec<u8>)
 }
 
 
-// send a message with data 
+// send a message with data
 fn send_mess_data(cmd:u32, msg:&Vec<u8>, port:&mut dyn SerialPort)
 {
 	let mut outstrng:Vec<u8> = Vec::new();
@@ -166,15 +144,15 @@ fn send_mess_data(cmd:u32, msg:&Vec<u8>, port:&mut dyn SerialPort)
 	for byte in msg
 	{
 		outstrng.push(*byte);
-	}	
+	}
 	appendtrailer(&mut outstrng);
 	let obytes = port.write(&outstrng).expect("write fail");
 	println!("sent {} bytes {}{}",obytes,outstrng[3] as char,outstrng[4] as char);
 }
 
 // send a message with 0 bytes of data
-// this copy into the middle of the message thing here probably isn't efficient but 
-// I don't imagine someone is going to be sending a lot of messages.. 
+// this copy into the middle of the message thing here probably isn't efficient but
+// I don't imagine someone is going to be sending a lot of messages..
 fn send_mess(cmd:u32, port:&mut dyn SerialPort)
 {
 	let dummy:Vec<u8> = Vec::new();
@@ -222,14 +200,14 @@ fn main()
 	//settings.baud_rate = 115200;
 	settings.timeout = Duration::from_millis(10);
 	let mut port = serialport::open_with_settings("/dev/ttyUSB0", &settings).expect("unable to open port");
-	
+
 
 	// left over code used to change the baud rate
 	//let mut outstrng:Vec<u8> = [b'0', b'8', b'0', b'0'].to_vec(); //9600
 	//let mut outstrng:Vec<u8> = [b'0', b'8', b'0', b'1'].to_vec(); //19200
 	//let mut outstrng:Vec<u8> = [b'0', b'8', b'0', b'3'].to_vec(); //57600
 	//let mut outstrng:Vec<u8> = [b'0', b'8', b'0', b'4'].to_vec(); //115200
-	//let outstrng:Vec<u8> = [b'1'].to_vec(); 
+	//let outstrng:Vec<u8> = [b'1'].to_vec();
 	//send_mess_data(80, &outstrng,&mut *port);
 
 	send_mess(1, &mut *port);
@@ -246,27 +224,27 @@ fn main()
 	// when that happens, power cycle seems to be the only solution
 	press_key(b'#', &mut *port);
 	press_key(b'#', &mut *port);
-	
+
 	loop
     {
 		let mut serial_data:[u8;32] = [0; 32];//will read no more than 128? = Vec::new();
 		let mut cmd_result = Vec::<u8>::new(); // [b'0', b'0', b'1'].to_vec();
 		cmd_result.clear();
 		loop
-        {
+	{
 			match port.read(&mut serial_data)
 			{
-				 Ok(bytes) => 
+				 Ok(bytes) =>
 				 {
 					 for this_byte in serial_data[0..bytes].iter()
 					 {
 					 //	cmd_result.append(&mut serial_data[0..bytes].to_vec());
-					 	cmd_result.push(*this_byte);
-					 	if *this_byte == 0x0a
-					 	{
+						cmd_result.push(*this_byte);
+						if *this_byte == 0x0a
+						{
 							match checkmsg(&mut cmd_result)
 							{
-								Ok(resp_val) => 
+								Ok(resp_val) =>
 								{
 									//println!("got good response {}", resp_val);
 									it100resp::parse_msg(resp_val, &mut lstate, &cmd_result);
@@ -280,22 +258,22 @@ fn main()
 										bump_installer = false;
 									}
 								}
-								Err(msg) => 
+								Err(msg) =>
 								{
-					 				println!("got bad message: {} -{:?}", msg, cmd_result );
-					 				bump_installer = false;		
-					 			} 
-					 		}
-					 		cmd_result.clear(); //start over
-					 		send_poll = 0;
-					 	}
+									println!("got bad message: {} -{:?}", msg, cmd_result );
+									bump_installer = false;
+								}
+							}
+							cmd_result.clear(); //start over
+							send_poll = 0;
+						}
 					 }
 				 }
-				 Err(_e) =>	 
+				 Err(_e) =>
 				 {
-				 	if cmd_result.len() < 2	
+					if cmd_result.len() < 2
 					{
-						// timeout			
+						// timeout
 						send_poll += 1;
 						if send_poll == 100 //75 it short enough that sometimes the error code doesn't come in before we start the next code
 						{
@@ -312,16 +290,16 @@ fn main()
 							bump_installer = true;
 
 							send_installer_sequence(installer_code, &mut *port);
-							
+
 							send_poll = 0;
 						}
 					}
-					else 
+					else
 					{
 						println!("timeout with partial");
 						bump_installer = false;
 					}
-				} 
+				}
 			}
 		}
 	}

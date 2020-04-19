@@ -1,0 +1,22 @@
+
+// rust, well lets see:
+// the forced Result/Err handling is good! Inconvenient for hack programs, but the ? and .expect() makes that less of an excuse.
+// the default warning/error levels help to push a program towards the if it compiles it works concept, this is awesome (catch the errors early) and is the main idea behind using rust, and it seems to work for simple programs.
+// int overflow/etc is specified in a reasonable way!
+// The compiler warning snake/camel/caps is a good convention (although I prefer more flexibility WRT local vs member/etc variables)
+
+// the default brace style is open on the same line as the condition/etc this is well known to be bad, which is why JSF/etc coding standards state match the braces and always use them, (aka lower cognitive load)
+// cargo, don't want to use it? Tough luck there if you just want a simple cargo dependency
+// type inference is fine for declaring, but not passing variables, what? I'm not even sure type inference is a good idea, the C++ auto keyword is just a crutch attempt to hide hideous type information, maybe one should avoid the hideiousness rather than hiding it
+// arrays, declaration vs initialization is a mess
+// the language doesn't have a "progression" in that you need to understand advanced concepts to do simple things, this might be the bigger problem than the borrow checker for learning the language.
+// "The rust programming language" exemplifies this by introducing error handling in the first chapter, but then doesn't explain fully until chapter 9, and its not complete because its not until chapter 11 when you learn how to create an Err/Result<>, so 200 pages to describe how to do something most languages can explain in the first chapter
+// the default syntax for many things requires scoping in the "constructor" , this actually violates the original premise of C++'s RII because it seems scoping in ::new() or ::from() is an inconsistent mess, worse when its generic, but the end result is non refrence types that aren't initialized
+// the array type is nearly useless without a bunch of manual macros/traits, might as well have just made Vec<> the default array
+// the default syntax is frequently inconvenient, copy_from_slice() on the destination, rather than .copy() on the source...
+// the non default &mut ends up being tagged into a lot of unneeded places because the compiler is dumb, maybe its my recent linux/c mindset, but I don't like long single assignments so I would rather assign and then add the additional bits this tends to force a lot of things !mut even which technically they are const, wonder if the compiler is smart enough to realize this
+// the borrow checker's errors are frequently odd, declare a vec<> without initializing it, the borrow checker ends up complaining about it being borrowed rather than noticing it needs to be initialized (see problem with RAII above)
+// type promotion is a pita
+// static compile time array's still need a declaration length? The compiler literally says "expected X elements; found Y"
+// array of structs are a PITA to declare due to a lot of unneeded verbosity, its way worse than ada/pascal which was criticized out of existence due to verbosity, painful because systems programs frequently have dozen or so line fixed structures
+// was cool with rust format! until i tried to make the first parameter non literal
